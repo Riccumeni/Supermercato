@@ -1,0 +1,1 @@
+[{"posizione":1,"codiceProdotto":1,"quantita":5}]

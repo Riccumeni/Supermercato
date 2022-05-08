@@ -24,9 +24,7 @@
         $sql = "select * from prodotto where id='$codiceProdotto'";
 
         $result = $conn->query($sql);
-
-        // TODO Aggiungere che se la quantita desiderata è maggiore di quella effettiva del prodotto fallisce la richiesta
-
+        
         if($result->num_rows>0){
             if(file_exists($percorsoCarrello)){
                 $handler = fopen($percorsoCarrello, 'r');
@@ -38,20 +36,23 @@
                 }
     
                 fclose($handler);
-                // echo $content;
+
                 $jsonCarrello = json_decode($content, true);
-                // Modificare la quantita di uno specifico elemento
                 
                 $trovato = false;
+
+                // controlla se l'elemento è già presente nel carrello
                 foreach ( $jsonCarrello as $element ) {
-                    if ( $codiceProdotto == $element['codice'] ) {
+                    if ( $codiceProdotto == $element['codiceProdotto'] ) {
                         $element['quantita'] += $quantita;
                         $jsonCarrello[$element['posizione']] = $element;
                         $trovato = true;
                     }
                 }
 
+                // se non è presente lo crea
                 if($trovato == false){
+                    echo array_key_last($jsonCarrello) + 1;
                     $nuovoProdotto = array("posizione" => array_key_last($jsonCarrello) + 1, "codiceProdotto" => $codiceProdotto, "quantita" => $quantita);
                     array_push($jsonCarrello, $nuovoProdotto);
                 }

@@ -20,8 +20,6 @@ if($conn && !empty($nome_fornitore) && !empty($email_fornitore) && !empty($indir
     $result = $conn->query($sql);
 
     if($result){
-        
-
         $response = array("success" => true, "message" => "fornitore inserito correttamente");
 
         echo json_encode($response);

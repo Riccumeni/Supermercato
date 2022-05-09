@@ -1,4 +1,5 @@
 <?php
+// UPDATE `utente` SET `carrello` = '[{\"codice_prodotto\" : 1, \"quantita\" : 3}]' WHERE `utente`.`id` = 1;
     header("Content-Type: application/json; charset=utf-8");
     header("Access-Control-Allow-Methods: POST");
     
@@ -7,10 +8,6 @@
     $codiceUtente = $data -> codiceUtente;
     $codiceProdotto = $data -> codiceProdotto;
     $quantita = $data -> quantita;
-
-
-    $percorsoCarrello = $codiceUtente . '_chart.txt';
-    $percorsoCarrello = "../../carrelli/" . $percorsoCarrello;
 
     $server = "localhost";
     $username = "root";
@@ -21,55 +18,51 @@
 
     if($conn){
 
-        $sql = "select * from prodotto where id='$codiceProdotto'";
+        $sql = "select carrello from utente where id='$codiceUtente'";
 
         $result = $conn->query($sql);
-        
-        if($result->num_rows>0){
-            if(file_exists($percorsoCarrello)){
-                $handler = fopen($percorsoCarrello, 'r');
 
-                $size = 1024;
-                
-                while(!feof($handler)){
-                    $content = fread($handler, $size);
-                }
-    
-                fclose($handler);
-
-                $jsonCarrello = json_decode($content, true);
-                
-                $trovato = false;
-
-                // controlla se l'elemento è già presente nel carrello
-                foreach ( $jsonCarrello as $element ) {
-                    if ( $codiceProdotto == $element['codiceProdotto'] ) {
-                        $element['quantita'] += $quantita;
-                        $jsonCarrello[$element['posizione']] = $element;
-                        $trovato = true;
+        if($result->num_rows > 0){
+            while($row = $result->fetch_assoc()){
+                $carrello = $row["carrello"];
+                $carrello = json_decode($carrello);
+            }
+            // echo json_encode(array("success" => true, "data" => $carrello));
+            $trovato = false;
+            for($i = 0; $i<count($carrello); $i++){
+                if($carrello[$i]->codice_prodotto == $codiceProdotto){
+                    $trovato = true;
+                    $carrello[$i]->quantita += $quantita;
+                    $carrello = json_encode($carrello);
+                    $sql = "UPDATE `utente` SET `carrello` = '$carrello' WHERE id = '$codiceUtente'";
+                    $conn->query($sql);
+                    if($conn->affected_rows > 0){
+                        echo json_encode(array("success" => true, "message" => "Quantita modificata correttamente"));
+                    }else{
+                        echo json_encode(array("success" => false, "message" => "Errore, quantita non modificata"));
                     }
                 }
+            }
 
-                // se non è presente lo crea
-                if($trovato == false){
-                    echo array_key_last($jsonCarrello) + 1;
-                    $nuovoProdotto = array("posizione" => array_key_last($jsonCarrello) + 1, "codiceProdotto" => $codiceProdotto, "quantita" => $quantita);
-                    array_push($jsonCarrello, $nuovoProdotto);
+            if($trovato == false){
+                $sql = "select id from prodotto where id = '$codiceProdotto'";
+                $result = $conn->query($sql);
+                if($result->num_rows > 0){
+                    array_push($carrello, array("codice_prodotto" => $codiceProdotto, "quantita" => $quantita));
+                    $carrello = json_encode($carrello);
+                    $sql = "UPDATE `utente` SET `carrello` = '$carrello' WHERE id = '$codiceUtente'";
+                    $conn->query($sql);
+                    if($conn->affected_rows > 0){
+                        echo json_encode(array("success" => true, "message" => "Prodotto aggiunto nel carrello correttamente"));
+                    }else{
+                        echo json_encode(array("success" => false, "message" => "Errore, prodotto non aggiunto"));
+                    }
+                }else{
+                    echo json_encode(array("success" => false, "message" => "Prodotto non esistente"));
                 }
-
-                $handler = fopen($percorsoCarrello, 'w');
-                
-                fwrite($handler, json_encode($jsonCarrello));
-                
-                fclose($handler);
-
-                echo json_encode(array("success" => true, "message" => "prodotto inserito correttamente nel carrello"));
-                
-            }else{
-                echo "file non trovato";
             }
         }else{
-            echo json_encode(array("success" => false, "message" => "prodotto non esistente"));
+            echo json_encode(array("success" => false, "message" => "Nessun carrello trovato"));
         }
     }else{
         $array = array("success" => false, "message" => "Errore con la connessione con il database");

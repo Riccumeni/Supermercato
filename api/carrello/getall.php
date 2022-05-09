@@ -4,10 +4,7 @@
     
     $data = json_decode(file_get_contents("php://input"));
 
-    $codice = $data -> codice;
-
-    $percorsoCarrello = $codice . '_chart.txt';
-    $percorsoCarrello = "../../carrelli/" . $percorsoCarrello;
+    $codiceUtente = $data -> codice;
 
     $server = "localhost";
     $username = "root";
@@ -17,25 +14,22 @@
     $conn = new mysqli($server, $username, $password, $db);
 
     if($conn){
-        if(file_exists($percorsoCarrello)){
-            $handler = fopen($percorsoCarrello, 'r');
+        $sql = "select carrello from utente where id='$codiceUtente'";
 
-            $size = 1024;
+        $result = $conn->query($sql);
 
-            while (!feof($handler)) {
-                $content = fread($handler, $size);
-            }
-
-            fclose($handler);
-
-            $array = array("success" => true, "data" => json_decode($content));
-
-            echo json_encode($array);
+        if($result->num_rows > 0){
+            
+            $row = $result->fetch_assoc();
+            $carrello = $row["carrello"];
+            $carrello = json_decode($carrello);
+            
+            echo json_encode(array("success" => true, "data" => $carrello));
         }else{
-            echo "file non trovato";
+            echo json_encode(array("success" => false, "message" => "Nessun carrello trovato"));
         }
     }else{
-        $array = array("success" => false, "message" => "Errore con la connessione con il database");
+        echo json_encode(array("success" => false, "message" => "Errore con la connessione con il database"));
     }
 
     $conn->close();

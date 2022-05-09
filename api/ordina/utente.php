@@ -1,5 +1,4 @@
 <?php
-// insert into operazione (valore, codice_utente, data, ordine) values (50, 1, STR_TO_DATE('2022-03-15', '%Y-%m-%d'), '[]');
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Methods: POST");
 
@@ -21,14 +20,15 @@ if($conn){
 
     $carrello = json_decode($carrello);
 
-    $totale = 0;
+    $fattura = array("totale" => 0);
     $not_success = array();
     foreach($carrello as $prodotto){
-        $sql = "select nome, quantita, prezzo*'$prodotto->quantita' as calcolo from prodotto where id='$prodotto->codice_prodotto'";
+        $sql = "select nome, quantita, prezzo, prezzo*'$prodotto->quantita' as calcolo from prodotto where id='$prodotto->codice_prodotto'";
         $result = $conn->query($sql);
         $row = $result -> fetch_assoc();
         if($row["quantita"] >= $prodotto->quantita){
-            $totale += $row["calcolo"];
+            $fattura['totale'] += $row["calcolo"];
+            array_push($fattura, array("nome" => $row["nome"], "quantita" => $prodotto->quantita, "prezzo" => $row["prezzo"]));
         }else{
             array_push($not_success, array("nome" => $row["nome"], "quantita disponibile" => $row["quantita"], "quantita desiderata" => $prodotto->quantita));
         }
@@ -37,16 +37,43 @@ if($conn){
     if(count($not_success) > 0){
         echo json_encode(array("success" => false, "message" => "ordine fallito perché era presente una quantita superiore di alcuni prodotti rispetto a quelli in magazzino", "data" => ($not_success)));
     }else{
-        // todo inserire il record nel database, pulire il carrello, dare una ricevuta
+        // todo: dare una ricevuta
         $data_oggi = date("Y/m/d");
         $ordine = json_encode($carrello);
-        $sql = "insert into operazione (valore, codice_utente, data, ordine) values ('$totale', '$codice_utente', '$data_oggi', '$ordine')";
-        $result = $conn->query($sql);
-        if($result){
-            echo "yeee";
-        }else{
-            echo "noo";
+        $totale = $fattura["totale"];
+        $conn->begin_transaction();
+        try{
+            $sql = "insert into operazione (valore, codice_utente, data, ordine) values ('$totale', '$codice_utente', '$data_oggi', '$ordine')";
+            $conn->query($sql);
+            $sql = "update utente set carrello = '[]' where id='$codice_utente'";
+            $conn->query($sql);
+            foreach($carrello as $prodotto){
+                $sql = "update prodotto set quantita = quantita - '$prodotto->quantita' where id='$prodotto->codice_prodotto'";
+                $conn->query($sql);
+                // todo chiedere alla facchini sui trigger
+            }
+
+
+            $conn->commit();
+
+        }catch (mysqli_sql_exception $exception) {
+            $mysqli->rollback();
+            throw $exception;
         }
+        // $sql = "insert into operazione (valore, codice_utente, data, ordine) values ('$totale', '$codice_utente', '$data_oggi', '$ordine')";
+
+        // $result = $conn->query($sql);
+        // if($result){
+        //     $sql = "update utente set carrello = '[]' where id='$codice_utente'";
+        //     $conn->query($sql);
+        //     if($conn->affected_rows > 0){
+        //         echo json_encode(array("success" => true, "data" => $fattura));
+        //     }else{
+        //         echo json_encode(array("success" => false, "message" => "Errore nella pulizia del carrello"));
+        //     }
+        // }else{
+        //     echo json_encode(array("success" => false, "message" => "Errore nell'inserimento dell'operazione"));
+        // }
     }
 }else{
     echo json_encode(array("success" => false, "message" => "Errore con il database"));

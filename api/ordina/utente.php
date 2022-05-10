@@ -28,7 +28,7 @@ if($conn){
         $row = $result -> fetch_assoc();
         if($row["quantita"] >= $prodotto->quantita){
             $fattura['totale'] += $row["calcolo"];
-            array_push($fattura, array("nome" => $row["nome"], "quantita" => $prodotto->quantita, "prezzo" => $row["prezzo"]));
+            array_push($fattura, array("nome" => $row["nome"], "quantita" => $prodotto->quantita, "prezzo" => $row["calcolo"]));
         }else{
             array_push($not_success, array("nome" => $row["nome"], "quantita disponibile" => $row["quantita"], "quantita desiderata" => $prodotto->quantita));
         }
@@ -43,6 +43,11 @@ if($conn){
         $totale = $fattura["totale"];
         $conn->begin_transaction();
         try{
+            /* Query da fare:
+            * Svuotare il carrello
+            * Scalare la quantita nella tabella dei prodotti in base a quello che l'utente ha ordinato, se la quantita diventa 0 si cancella il prodotto
+            * Inserire l'operazione nella tabella operazioni
+            */
             $sql = "insert into operazione (valore, codice_utente, data, ordine) values ('$totale', '$codice_utente', '$data_oggi', '$ordine')";
             $conn->query($sql);
             $sql = "update utente set carrello = '[]' where id='$codice_utente'";
@@ -50,7 +55,6 @@ if($conn){
             foreach($carrello as $prodotto){
                 $sql = "update prodotto set quantita = quantita - '$prodotto->quantita' where id='$prodotto->codice_prodotto'";
                 $conn->query($sql);
-                // todo chiedere alla facchini sui trigger
             }
 
 
@@ -60,20 +64,7 @@ if($conn){
             $mysqli->rollback();
             throw $exception;
         }
-        // $sql = "insert into operazione (valore, codice_utente, data, ordine) values ('$totale', '$codice_utente', '$data_oggi', '$ordine')";
-
-        // $result = $conn->query($sql);
-        // if($result){
-        //     $sql = "update utente set carrello = '[]' where id='$codice_utente'";
-        //     $conn->query($sql);
-        //     if($conn->affected_rows > 0){
-        //         echo json_encode(array("success" => true, "data" => $fattura));
-        //     }else{
-        //         echo json_encode(array("success" => false, "message" => "Errore nella pulizia del carrello"));
-        //     }
-        // }else{
-        //     echo json_encode(array("success" => false, "message" => "Errore nell'inserimento dell'operazione"));
-        // }
+        echo json_encode(array("success" => true, "data" => $fattura));
     }
 }else{
     echo json_encode(array("success" => false, "message" => "Errore con il database"));

@@ -14,16 +14,25 @@ $password = $data->password;
 $conn = new mysqli($server, $username, $pass, $db);
 
 if($conn && (!empty($email) && !empty($password))){
-    $password_hashed = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "insert into utente (email, password, permessi, carrello) values ('$email', '$password_hashed', 'u', '[]')";
+    
+    $sql = "select id, email, password from utente where email like '$email'";
+
     $result = $conn->query($sql);
-    if($result){
-        echo json_encode(array("success" => true, "message" => "Utente inserito correttamente"));
+
+    if($result->num_rows > 0){
+        $row = $result->fetch_assoc();
+        if(password_verify($password, $row["password"])){
+            echo json_encode(array("success" => true, "message" => "Utente loggato correttamente", "id" => $row['id']));
+        }else{
+            echo json_encode(array("success" => false, "message" => "Credenziali non corrette"));
+        }
     }else{
-        echo json_encode(array("success" => false, "message" => "Errore con i campi"));
+        echo json_encode(array("success" => false, "message" => "Utente non trovato"));
     }
+
 }else{
     echo json_encode(array("success" => false, "message" => "Errore con il database o campi mancanti"));
 }
 
+$conn->close();
 ?>

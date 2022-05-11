@@ -43,11 +43,6 @@ if($conn){
         $totale = $fattura["totale"];
         $conn->begin_transaction();
         try{
-            /* Query da fare:
-            * Svuotare il carrello
-            * Scalare la quantita nella tabella dei prodotti in base a quello che l'utente ha ordinato, se la quantita diventa 0 si cancella il prodotto
-            * Inserire l'operazione nella tabella operazioni
-            */
             $sql = "insert into operazione (valore, codice_utente, data, ordine) values ('$totale', '$codice_utente', '$data_oggi', '$ordine')";
             $conn->query($sql);
             $sql = "update utente set carrello = '[]' where id='$codice_utente'";

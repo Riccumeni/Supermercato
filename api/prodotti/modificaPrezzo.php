@@ -3,7 +3,7 @@
 	header("Access-Control-Allow-Methods: POST");
 
 	//includiamo configurazioni e oggetti
-	include_once 'db.php';
+	include_once '../resources/db.php';
 
 	//Connessione db
 	$database = new Database();

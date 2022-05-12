@@ -39,13 +39,19 @@
         // }
 
 	}else if((!empty($data->nome) && !empty($data->quantita) && !empty($data->categoria) && !empty($data->prezzo) && !empty($data->nome_fornitore))){
-		$query = "insert into prodotto (nome, quantita, categoria, prezzo, nome_fornitore) values ('$data->nome', '$data->quantita', '$data->categoria', '$data->prezzo', '$data->nome_fornitore')";
-		$result = $db->query($query);
-		if($result){
-			echo json_encode(["success" => true, "message" => "operazione riuscita"]);
+		$result = $db -> query("select * from prodotto where nome like '$data->nome'");
+		if($result->num_rows > 0){
+			echo json_encode(["success" => false, "message" => "prodotto già presente"]);
 		}else{
-			echo json_encode(["success" => false, "message" => "errore con l'inserimento"]);
+			$query = "insert into prodotto (nome, quantita, categoria, prezzo, nome_fornitore) values ('$data->nome', '$data->quantita', '$data->categoria', '$data->prezzo', '$data->nome_fornitore')";
+			try{
+				$result = $db->query($query);
+				echo json_encode(["success" => true, "message" => "operazione riuscita"]);
+			}catch(Exception $e){
+				echo json_encode(["success" => false, "message" => "errore con l'inserimento"]);
+			}
 		}
+		
 	}
 	else{
 		$r = array("Success"=>"false","Message" => "Campi mancanti");

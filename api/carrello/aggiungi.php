@@ -27,7 +27,7 @@
                 $carrello = $row["carrello"];
                 $carrello = json_decode($carrello);
             }
-            // echo json_encode(array("success" => true, "data" => $carrello));
+            
             $trovato = false;
             for($i = 0; $i<count($carrello); $i++){
                 if($carrello[$i]->codice_prodotto == $codiceProdotto){

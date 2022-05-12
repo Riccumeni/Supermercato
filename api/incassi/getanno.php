@@ -2,7 +2,7 @@
 	header("Content-Type: application/json; charset=UTF-8");
 	header("Access-Control-Allow-Methods: POST");
 
-	include_once 'db.php';
+	include_once '../resources/db.php';
 
 	$database = new Database();    //connessione db
 	$db = $database->getConnection();

@@ -43,15 +43,24 @@
 		if($result->num_rows > 0){
 			echo json_encode(["success" => false, "message" => "prodotto già presente"]);
 		}else{
-			$query = "insert into prodotto (nome, quantita, categoria, prezzo, nome_fornitore) values ('$data->nome', '$data->quantita', '$data->categoria', '$data->prezzo', '$data->nome_fornitore')";
+			$conn->begin_transaction();
+			// todo: inserire sia il prodotto che inserire nelle ordinazioni
 			try{
+				$query = "insert into prodotto (nome, quantita, categoria, prezzo, nome_fornitore) values ('$data->nome', '$data->quantita', '$data->categoria', '$data->prezzo', '$data->nome_fornitore')";
+				
 				$result = $db->query($query);
+
+				
+
 				echo json_encode(["success" => true, "message" => "operazione riuscita"]);
-			}catch(Exception $e){
+
+				$conn->commit();
+			}catch(mysqli_sql_exception $exception) {
 				echo json_encode(["success" => false, "message" => "errore con l'inserimento"]);
+				$mysqli->rollback();
+				throw $exception;
 			}
 		}
-		
 	}
 	else{
 		$r = array("Success"=>"false","Message" => "Campi mancanti");

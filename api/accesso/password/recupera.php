@@ -27,7 +27,6 @@ if($conn && !empty($email)){
 
     $sql = "update utente set password = '$pass_hashed' where email='$email'";
     $conn->query($sql);
-
     if($conn->affected_rows > 0){
         mail($email, "Recupero password", "E' stata modificata la password in -> $newpass \nRicordarsi di modificarla il prima possibile");
         echo json_encode(array("success" => true, "message" => "mail inviata!"));

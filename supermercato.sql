@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.3
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Creato il: Mag 09, 2022 alle 10:43
+-- Creato il: Mag 13, 2022 alle 18:19
 -- Versione del server: 10.4.21-MariaDB
--- Versione PHP: 8.1.2
+-- Versione PHP: 8.1.0
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `supermercato`
+-- Database: `Supermercato`
 --
 
 -- --------------------------------------------------------
@@ -77,16 +77,9 @@ CREATE TABLE `prodotto` (
   `nome` varchar(30) NOT NULL,
   `quantita` int(11) NOT NULL,
   `categoria` varchar(30) NOT NULL,
-  `prezzo` double NOT NULL
+  `prezzo` double NOT NULL,
+  `nome_fornitore` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dump dei dati per la tabella `prodotto`
---
-
-INSERT INTO `prodotto` (`id`, `nome`, `quantita`, `categoria`, `prezzo`) VALUES
-(1, 'pizza', 5, 'alimentari', 5),
-(2, 'pane', 7, 'alimentari', 1);
 
 -- --------------------------------------------------------
 
@@ -124,7 +117,8 @@ ALTER TABLE `categoria`
 --
 ALTER TABLE `fornitore`
   ADD PRIMARY KEY (`nome`),
-  ADD UNIQUE KEY `id` (`id`);
+  ADD UNIQUE KEY `id` (`id`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indici per le tabelle `operazione`
@@ -138,7 +132,8 @@ ALTER TABLE `operazione`
 --
 ALTER TABLE `prodotto`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `categoria` (`categoria`);
+  ADD KEY `categoria` (`categoria`),
+  ADD KEY `nome_fornitore` (`nome_fornitore`);
 
 --
 -- Indici per le tabelle `utente`
@@ -184,7 +179,8 @@ ALTER TABLE `operazione`
 -- Limiti per la tabella `prodotto`
 --
 ALTER TABLE `prodotto`
-  ADD CONSTRAINT `prodotto_ibfk_1` FOREIGN KEY (`categoria`) REFERENCES `categoria` (`titolo`);
+  ADD CONSTRAINT `prodotto_ibfk_1` FOREIGN KEY (`categoria`) REFERENCES `categoria` (`titolo`),
+  ADD CONSTRAINT `prodotto_ibfk_2` FOREIGN KEY (`nome_fornitore`) REFERENCES `fornitore` (`nome`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

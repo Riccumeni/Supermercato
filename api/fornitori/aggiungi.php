@@ -17,15 +17,20 @@ $conn = new mysqli($server, $username, $password, $db);
 if($conn && !empty($nome_fornitore) && !empty($email_fornitore) && !empty($indirizzo_fornitore)){
     $sql = "insert into fornitore (nome, email, indirizzo) values ('$nome_fornitore', '$email_fornitore', '$indirizzo_fornitore')";
 
-    $result = $conn->query($sql);
+    try{
+        if($result){
+            $response = array("success" => true, "message" => "fornitore inserito correttamente");
 
-    if($result){
-        $response = array("success" => true, "message" => "fornitore inserito correttamente");
-
-        echo json_encode($response);
-    }else{
+            echo json_encode($response);
+        }else{
+            echo json_encode(array("success" => false, "message" => "fornitore non inserito correttamente"));
+        }
+    }catch(Exception $e){
         echo json_encode(array("success" => false, "message" => "fornitore non inserito correttamente"));
     }
+    $result = $conn->query($sql);
+
+    
 }else{
     echo json_encode(array("success" => false, "message" => "Errore con il database o campi mancanti"));
 }

@@ -3,20 +3,22 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.Buffer;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class ClientMagazzino {
-    public static void main(String[] args) throws java.io.IOException{
+    final static String indirizzo = "http://localhost/Supermercato/api";
+    public static void main(String[] args) throws java.io.IOException, ParseException{
 
         // Client client = new Client();
         // client.login();
         JSONObject body = new JSONObject();
         JSONParser parser = new JSONParser();
         BufferedReader tastiera = new BufferedReader(new InputStreamReader(System.in));
-        final String indirizzo = "http://localhost/Supermercato/api";
+        
         String scelta = "";
         int codiceUtente = -1;
 
@@ -39,68 +41,36 @@ public class ClientMagazzino {
                             scelta = tastiera.readLine();
                             switch(scelta){
                                 case "1":
-                                try {
-                                    System.out.println("Inserisci il nome del prodotto da cercare");
-                                    String nome=tastiera.readLine();
-                                    body.put("prodotto",nome);
-                                    JSONObject response = postRequest(indirizzo + "/ricerca/nome.php", body.toJSONString());
-
-                                    if((Boolean) response.get("success")){
-                                        System.out.println(response.get("data"));
-                                        // todo fare istruzioni che fa inserire il codice del prodotto e la quantita da mettere nel carrello
-                                    }else{
-                                        System.out.println(response.get("message"));
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                ricercaProdottoNome(tastiera, codiceUtente);
                                 break;
                                 case "2":
+                                ricercaProdottoCategoria(tastiera, codiceUtente);
                                 break;
                             }
                             break;
                             case "2":
+                            String s = getCarrello(tastiera, codiceUtente);
+                            switch(s){
+                                case "1":
+                                rimuoviElemento(codiceUtente, tastiera);
+                                break;
+                                case "2":
+                                ordina(tastiera, codiceUtente);
+                                break;
+                            }
                             break;
                             case "3":
+                            recuperoPassword(tastiera);
                             break;
                         }
                     }
                 }
                 break;
                 case "2":
-                System.out.println("Inserire l'email");
-                String s = tastiera.readLine();
-                body.put("email", s);
-                System.out.println("Inserire la password");
-                s = tastiera.readLine();
-                body.put("password", s);
-
-                    try {
-                        JSONObject response = postRequest(indirizzo + "/accesso/registrazione.php", body.toJSONString());
-                        if((Boolean) response.get("success")){
-                            System.out.println(response.get("message"));
-                        }else{
-                            System.out.println(response.get("message"));
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
+                registrazione(tastiera);
                 break;
                 case "3":
-                System.out.println("Inserire l'email:");
-                s = tastiera.readLine();
-                body.put("email", s);
-                    try {
-                        JSONObject response = postRequest(indirizzo + "/accesso/password/recupero.php", body.toJSONString());
-                        if((Boolean) response.get("success")){
-                            System.out.println(response.get("message"));
-                        }else{
-                            System.out.println(response.get("message"));
-                        }
-                    } catch (ParseException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                recuperoPassword(tastiera);
 
                 break;
                 case "exit":
@@ -110,7 +80,7 @@ public class ClientMagazzino {
 
     }
 
-    public static JSONObject postRequest(String indirizzo,String body) throws ParseException{
+    public static JSONObject postRequest(String indirizzo,String bodyCarrello) throws ParseException{
         String risposta = null;
         JSONParser parser = new JSONParser();
         try{
@@ -120,7 +90,7 @@ public class ClientMagazzino {
             con.setDoInput(true);
             con.setDoOutput(true);
             OutputStream os = con.getOutputStream();
-            os.write(body.getBytes());
+            os.write(bodyCarrello.getBytes());
             os.flush();
             os.close();
 
@@ -175,6 +145,167 @@ public class ClientMagazzino {
         }
 
         return codiceUtente;
+    }
+
+    public static void recuperoPassword(BufferedReader tastiera){
+        JSONObject body = new JSONObject();
+        try{
+            System.out.println("Inserire l'email:");
+            String s = tastiera.readLine();
+            body.put("email", s);
+            try {
+                JSONObject response = postRequest(indirizzo + "/accesso/password/recupero.php", body.toJSONString());
+                if((Boolean) response.get("success")){
+                    System.out.println(response.get("message"));
+                }else{
+                    System.out.println(response.get("message"));
+                }
+            } catch (ParseException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }catch(Exception e){
+            
+        }  
+    }
+
+    public static void rimuoviElemento(int codiceUtente, BufferedReader tastiera){
+        JSONObject bodyCarrello = new JSONObject();
+        try {
+            System.out.println("Selezionare il codice del prodotto:");
+            String s = tastiera.readLine();
+            bodyCarrello.put("codiceProdotto", s);
+            System.out.println("Inserire la quantita da rimuovere: (0 per eliminarlo)");
+            s = tastiera.readLine();
+            bodyCarrello.put("quantita", s);
+            bodyCarrello.put("codiceUtente", codiceUtente);
+
+            JSONObject response = postRequest(indirizzo + "/carrello/rimuovi.php", bodyCarrello.toJSONString());
+            System.out.println(response.get("message"));
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+        
+    }
+
+    public static String getCarrello(BufferedReader tastiera, int codiceUtente){
+        String s = "";
+        try {
+            System.out.println("------ Carrello ------");
+            JSONObject bodyCarrello = new JSONObject();
+            bodyCarrello.put("codice", codiceUtente);
+            JSONObject carrello = postRequest(indirizzo + "/carrello/getall.php", bodyCarrello.toJSONString());
+            System.out.println(carrello.get("data"));
+            System.out.println("Inserire un operazione:");
+            System.out.println("1. Rimuovi Elemento\n2. Ordina");
+            s = tastiera.readLine();
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+        return s;
+    }
+
+    public static void registrazione(BufferedReader tastiera){
+        JSONObject body = new JSONObject();
+        try {
+            System.out.println("Inserire l'email");
+            String s = tastiera.readLine();
+            body.put("email", s);
+            System.out.println("Inserire la password");
+            s = tastiera.readLine();
+            body.put("password", s);
+
+            try {
+                JSONObject response = postRequest(indirizzo + "/accesso/registrazione.php", body.toJSONString());
+                if((Boolean) response.get("success")){
+                    System.out.println(response.get("message"));
+                }else{
+                    System.out.println(response.get("message"));
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+    }
+
+    public static void ricercaProdottoCategoria(BufferedReader tastiera, int codiceUtente){
+        JSONObject body = new JSONObject();
+        try {
+            System.out.println("Inserisci il genere del prodotto da cercare");
+            String nome=tastiera.readLine();
+            body.put("prodotto",nome);
+            JSONObject response = postRequest(indirizzo + "/ricerca/genere.php", body.toJSONString());
+
+            if((Boolean) response.get("success")){
+                body = new JSONObject();
+                System.out.println(response.get("data"));
+                System.out.println("Inserire il codice del prodotto: (-1 se non si desidera niente)");
+                String s = tastiera.readLine();
+                if(!s.equals("-1")){
+                    body.put("codiceProdotto", s);
+                    System.out.println("Selezionare la quantita");
+                    s = tastiera.readLine();
+                    body.put("quantita", s);
+                    body.put("codiceUtente", codiceUtente);
+                    response = postRequest(indirizzo + "/carrello/aggiungi.php", body.toJSONString());
+                    System.out.println(response.get("message"));
+                }  
+
+            }else{
+                System.out.println(response.get("message"));
+            }
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+    }
+
+    public static void ricercaProdottoNome(BufferedReader tastiera, int codiceUtente){
+        JSONObject body = new JSONObject();
+        try {
+            System.out.println("Inserisci il nome del prodotto da cercare");
+            String nome=tastiera.readLine();
+            body.put("prodotto",nome);
+            JSONObject response = postRequest(indirizzo + "/ricerca/nome.php", body.toJSONString());
+
+            if((Boolean) response.get("success")){
+                body = new JSONObject();
+                System.out.println(response.get("data"));
+                System.out.println("Inserire il codice del prodotto: (-1 se non si desidera niente)");
+                String s = tastiera.readLine();
+                if(!s.equals("-1")){
+                    body.put("codiceProdotto", s);
+                    System.out.println("Selezionare la quantita");
+                    s = tastiera.readLine();
+                    body.put("quantita", s);
+                    body.put("codiceUtente", codiceUtente);
+                    response = postRequest(indirizzo + "/carrello/aggiungi.php", body.toJSONString());
+                    System.out.println(response.get("message"));
+                }  
+
+            }else{
+                System.out.println(response.get("message"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ordina(BufferedReader tastiera, int codiceUtente){
+        JSONObject body = new JSONObject();
+        try {
+            body.put("id", codiceUtente);
+            JSONObject response = postRequest(indirizzo + "/ordina/utente.php", body.toJSONString());
+
+            if((Boolean) response.get("success")){
+                System.out.println(response.get("data"));
+            }else{
+                System.out.println(response.get("message"));
+            }
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
     }
 }
 

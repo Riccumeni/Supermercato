@@ -20,10 +20,10 @@
 			$result = $db->query($query);
 
 			if($result->affected_rows > 0){
-				$r = array("Success"=>"true","Message" => "Quantita' aggiunta");
+				$r = array("success"=>"true","message" => "Quantita' aggiunta");
 				echo json_encode($r);
 			}else{
-				$r = array("Success"=>"true","Message" => "Quantita' non aggiunta");
+				$r = array("success"=>"true","message" => "Quantita' non aggiunta");
 				echo json_encode($r);
 			}
 		}catch(Exception $e){
@@ -43,27 +43,28 @@
         // }
 
 	}else if((!empty($data->nome) && !empty($data->quantita) && !empty($data->categoria) && !empty($data->prezzo) && !empty($data->nome_fornitore))){
+		
 		$result = $db -> query("select * from prodotto where nome like '$data->nome'");
 		if($result->num_rows > 0){
 			echo json_encode(["success" => false, "message" => "prodotto già presente"]);
 		}else{
 			$db->begin_transaction();
-			// todo: inserire sia il prodotto che inserire nelle ordinazioni
 			try{
 				$query = "insert into prodotto (nome, quantita, categoria, prezzo, nome_fornitore) values ('$data->nome', '$data->quantita', '$data->categoria', '$data->prezzo', '$data->nome_fornitore')";
 				
 				$db->query($query);
 
-				$valore = $data->prezzo * $data->$quantita;
+				$valore = $data->prezzo * $data->quantita;
 				$data_oggi = date("Y-m-d");
+				
 				$ordine = json_encode($data);
 				$query = "insert into operazione (valore, nome_fornitore, data, ordine) values ('$valore', '$data->nome_fornitore', '$data_oggi', '$ordine')";
 
 				$db->query($query);
 				
-				echo json_encode(["success" => true, "message" => "operazione riuscita"]);
-
 				$conn->commit();
+				
+				echo json_encode(["success" => true, "message" => "operazione riuscita"]);
 			}catch(Exception $exception) {
 				echo $exception->getMessage();
 				echo json_encode(["success" => false, "message" => "errore con l'inserimento"]);
@@ -73,7 +74,7 @@
 		}
 	}
 	else{
-		$r = array("Success"=>"false","Message" => "Campi mancanti");
+		$r = array("Success"=>"false","message" => "Campi mancanti");
 		echo json_encode($r);
 	}
 ?>

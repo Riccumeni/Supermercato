@@ -15,7 +15,7 @@ $conn = new mysqli($server, $username, $pass, $db);
 
 if($conn && (!empty($email) && !empty($password))){
     
-    $sql = "select id, email, password from utente where email like '$email' and permessi like u";
+    $sql = "select id, email, password from utente where email like '$email' and permessi like a";
 
     $result = $conn->query($sql);
 

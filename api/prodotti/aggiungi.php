@@ -13,21 +13,35 @@
 	
 	if((!empty($data->codice) && !empty($data->quantita))){
 
-		// aggiunto l'aggiunta di un prodotto
+		$query = "select prezzo, nome_fornitore from prodotto where id='$data->codice'";
+
+		$result = $db->query($query);
+
+		$row = $result->fetch_assoc();
+
+		$prezzo = $row["prezzo"];
+		$nome_fornitore = $row["nome_fornitore"];
+
+		$db->begin_transaction();
 		
-		$query = "UPDATE prodotto SET quantita=quantita+'$data->quantita' WHERE id='$data->codice'";
 		try{
+			$query = "UPDATE prodotto SET quantita=quantita+'$data->quantita' WHERE id='$data->codice'";
 			$result = $db->query($query);
 
-			if($result->affected_rows > 0){
-				$r = array("success"=>"true","message" => "Quantita' aggiunta");
-				echo json_encode($r);
-			}else{
-				$r = array("success"=>"true","message" => "Quantita' non aggiunta");
-				echo json_encode($r);
-			}
+			$valore = $prezzo * $data->quantita;
+			$data_oggi = date("Y-m-d");
+			$ordine = json_encode($data);
+			$query = "insert into operazione (valore, nome_fornitore, data, ordine) values ('$valore', '$nome_fornitore', '$data_oggi', '$ordine')";
+			$db->query($query);
+			$r = array("success"=>"true","message" => "Quantita' aggiunta");
+			echo json_encode($r);
+			$db->commit();			
 		}catch(Exception $e){
+			$r = array("success"=>"false","message" => "Quantita' non aggiunta");
+			echo json_encode($r);
 			echo $e->getMessage();
+			$db->rollback();
+			throw $e;
 		}
 
 		
@@ -61,10 +75,11 @@
 				$query = "insert into operazione (valore, nome_fornitore, data, ordine) values ('$valore', '$data->nome_fornitore', '$data_oggi', '$ordine')";
 
 				$db->query($query);
-				
-				$conn->commit();
-				
+
 				echo json_encode(["success" => true, "message" => "operazione riuscita"]);
+				$db->commit();
+				
+				
 			}catch(Exception $exception) {
 				echo $exception->getMessage();
 				echo json_encode(["success" => false, "message" => "errore con l'inserimento"]);

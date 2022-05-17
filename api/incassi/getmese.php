@@ -2,7 +2,7 @@
 	header("Content-Type: application/json; charset=UTF-8");
 	header("Access-Control-Allow-Methods: POST");
 
-	include_once 'db.php';
+	include_once '../resources/db.php';
 
 	$database = new Database();    //connessione db
 	$db = $database->getConnection();
@@ -29,19 +29,19 @@
 			$ordine = array();
 			
 			while ($row = $ris_2 -> fetch_assoc()){
-				$ordini = array("Success" => "true" , "ID: " => $row['id'] , "Nome: " => $row['valore'] ,"Codice Utente: " => $row['codice_utente'], "Data: " => $row['data']);
+				$ordini = array("success" => true , "ID: " => $row['id'] , "Nome: " => $row['valore'] ,"Codice Utente: " => $row['codice_utente'], "Data: " => $row['data']);
 				array_push($ordine, $ordini);
 			}
-			$r = array("Success"=>"true","ORDINI" => $ordine , "INCASSI" =>"Incassi mensili: $ris[risultato] ");
+			$r = array("success"=>true,"ORDINI" => $ordine , "INCASSI" =>"Incassi mensili: $ris[risultato] ");
 			echo json_encode($r);	
 				
 			}
 		else{
-			$r = array("Success" => "false", "Message" => "Non sono presenti operazioni per questo mese");
+			$r = array("success" => false, "Message" => "Non sono presenti operazioni per questo mese");
 			echo json_encode($r);
 		}
 	}else{
-		$r = array("Success"=>"false","Message" => "Data mancante");
+		$r = array("success"=>false,"Message" => "Data mancante");
 		echo json_encode($r);
 	}
 	

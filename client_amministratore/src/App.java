@@ -128,8 +128,8 @@ public class App {
 
                 if((Boolean) body.get("success")){
                     System.out.println("--- Ordini ---");
-                    System.out.println(body.get("ordini"));
-                    System.out.println("TOTALE: " + body.get("totale"));
+                    System.out.println(body.get("ORDINI"));
+                    System.out.println("TOTALE: " + body.get("INCASSI"));
                 }else{
                     System.out.println(body.get("message"));
                 }
@@ -146,8 +146,8 @@ public class App {
 
                 if((Boolean) body.get("success")){
                     System.out.println("--- Ordini ---");
-                    System.out.println(body.get("ordini"));
-                    System.out.println("TOTALE: " + body.get("totale"));
+                    System.out.println(body.get("ORDINI"));
+                    System.out.println("TOTALE: " + body.get("INCASSI"));
                 }else{
                     System.out.println(body.get("message"));
                 }
@@ -161,8 +161,8 @@ public class App {
 
                 if((Boolean) body.get("success")){
                     System.out.println("--- Ordini ---");
-                    System.out.println(body.get("ordini"));
-                    System.out.println("TOTALE: " + body.get("totale"));
+                    System.out.println(body.get("ORDINI"));
+                    System.out.println("TOTALE: " + body.get("INCASSI"));
                 }else{
                     System.out.println(body.get("message"));
                 }

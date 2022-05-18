@@ -50,6 +50,10 @@ public class ClientMagazzino {
                             break;
                             case "2":
                             String s = getCarrello(tastiera, codiceUtente);
+                            System.out.println(s);
+                            System.out.println("Operazioni disponibili:");
+                            System.out.println("1. Rimuovi Elemento\n2. Ordina");
+                            s = tastiera.readLine();
                             switch(s){
                                 case "1":
                                 rimuoviElemento(codiceUtente, tastiera);
@@ -105,9 +109,9 @@ public class ClientMagazzino {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         
-        
-        return (JSONObject) parser.parse(risposta) ;
+        return (JSONObject) parser.parse(risposta);
     }
 
     public static int login(){

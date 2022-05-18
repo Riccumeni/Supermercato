@@ -15,9 +15,13 @@ $conn = new mysqli($server, $username, $pass, $db);
 
 if($conn && (!empty($email) && !empty($password))){
     
-    $sql = "select id, email, password from utente where email like '$email' and permessi like u";
+    $sql = "select id, email, password from utente where email like '$email' and permessi like 'u'";
 
-    $result = $conn->query($sql);
+    try{
+        $result = $conn->query($sql);
+    }catch(Exception $e){
+        $e->getMessage();
+    }
 
     if($result->num_rows > 0){
         $row = $result->fetch_assoc();

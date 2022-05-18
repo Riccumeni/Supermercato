@@ -15,7 +15,7 @@
 	if(!empty($info->anno)){        // se ci sono i campi, fa la somma degli importi dove il mese e l'anno coincidono con quelli inseriti
 		
 		
-		$sql = "SELECT SUM(valore) AS risultato FROM operazione WHERE YEAR(data) = '$info->anno'"; 
+		$sql = "SELECT SUM(valore) AS risultato FROM operazione WHERE YEAR(data) = '$info->anno' AND codice_utente IS NOT NULL"; 
 		$ris = $db->query($sql);
 		if($ris -> num_rows >0){
 			$ris = $ris -> fetch_assoc();
@@ -23,7 +23,7 @@
             
 			
 			//seconda query per visulazzare tutti gli importi
-			$sql_2 = "SELECT * FROM operazione WHERE YEAR(data) = '$info->anno'"; 
+			$sql_2 = "SELECT * FROM operazione WHERE YEAR(data) = '$info->anno' AND codice_utente IS NOT NULL"; 
 			$ris_2 = $db->query($sql_2);
 			
 			$ordine = array();

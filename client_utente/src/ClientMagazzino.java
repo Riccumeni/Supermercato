@@ -10,11 +10,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class ClientMagazzino {
+    static BufferedReader tastiera = new BufferedReader(new InputStreamReader(System.in));
     final static String indirizzo = "http://localhost/Supermercato/api";
     public static void main(String[] args) throws java.io.IOException, ParseException{
 
-        // Client client = new Client();
-        // client.login();
         JSONObject body = new JSONObject();
         JSONParser parser = new JSONParser();
         BufferedReader tastiera = new BufferedReader(new InputStreamReader(System.in));
@@ -37,44 +36,45 @@ public class ClientMagazzino {
                         scelta = tastiera.readLine();
                         switch(scelta){
                             case "1":
-                            System.out.println("1. Per nome\n2. Per genere");
+                            System.out.println("1. Per nome\n2. Per categoria");
                             scelta = tastiera.readLine();
                             switch(scelta){
                                 case "1":
-                                ricercaProdottoNome(tastiera, codiceUtente);
+                                ricercaProdottoNome(codiceUtente);
                                 break;
                                 case "2":
-                                ricercaProdottoCategoria(tastiera, codiceUtente);
+                                visualizzaCategorie();
+                                ricercaProdottoCategoria(codiceUtente);
                                 break;
                             }
                             break;
                             case "2":
-                            String s = getCarrello(tastiera, codiceUtente);
+                            String s = getCarrello(codiceUtente);
                             System.out.println(s);
                             System.out.println("Operazioni disponibili:");
                             System.out.println("1. Rimuovi Elemento\n2. Ordina");
                             s = tastiera.readLine();
                             switch(s){
                                 case "1":
-                                rimuoviElemento(codiceUtente, tastiera);
+                                rimuoviElemento(codiceUtente);
                                 break;
                                 case "2":
-                                ordina(tastiera, codiceUtente);
+                                ordina(codiceUtente);
                                 break;
                             }
                             break;
                             case "3":
-                            recuperoPassword(tastiera);
+                            recuperoPassword();
                             break;
                         }
                     }
                 }
                 break;
                 case "2":
-                registrazione(tastiera);
+                registrazione();
                 break;
                 case "3":
-                recuperoPassword(tastiera);
+                recuperoPassword();
 
                 break;
                 case "exit":
@@ -151,7 +151,7 @@ public class ClientMagazzino {
         return codiceUtente;
     }
 
-    public static void recuperoPassword(BufferedReader tastiera){
+    public static void recuperoPassword(){
         JSONObject body = new JSONObject();
         try{
             System.out.println("Inserire l'email:");
@@ -173,7 +173,7 @@ public class ClientMagazzino {
         }  
     }
 
-    public static void rimuoviElemento(int codiceUtente, BufferedReader tastiera){
+    public static void rimuoviElemento(int codiceUtente){
         JSONObject bodyCarrello = new JSONObject();
         try {
             System.out.println("Selezionare il codice del prodotto:");
@@ -192,7 +192,7 @@ public class ClientMagazzino {
         
     }
 
-    public static String getCarrello(BufferedReader tastiera, int codiceUtente){
+    public static String getCarrello(int codiceUtente){
         String s = "";
         try {
             System.out.println("------ Carrello ------");
@@ -209,7 +209,7 @@ public class ClientMagazzino {
         return s;
     }
 
-    public static void registrazione(BufferedReader tastiera){
+    public static void registrazione(){
         JSONObject body = new JSONObject();
         try {
             System.out.println("Inserire l'email");
@@ -234,7 +234,7 @@ public class ClientMagazzino {
         }
     }
 
-    public static void ricercaProdottoCategoria(BufferedReader tastiera, int codiceUtente){
+    public static void ricercaProdottoCategoria(int codiceUtente){
         JSONObject body = new JSONObject();
         try {
             System.out.println("Inserisci il genere del prodotto da cercare");
@@ -265,12 +265,12 @@ public class ClientMagazzino {
         }
     }
 
-    public static void ricercaProdottoNome(BufferedReader tastiera, int codiceUtente){
+    public static void ricercaProdottoNome(int codiceUtente){
         JSONObject body = new JSONObject();
         try {
             System.out.println("Inserisci il nome del prodotto da cercare");
             String nome=tastiera.readLine();
-            body.put("prodotto",nome);
+            body.put("nome",nome);
             JSONObject response = postRequest(indirizzo + "/ricerca/nome.php", body.toJSONString());
 
             if((Boolean) response.get("success")){
@@ -296,7 +296,7 @@ public class ClientMagazzino {
         }
     }
 
-    public static void ordina(BufferedReader tastiera, int codiceUtente){
+    public static void ordina(int codiceUtente){
         JSONObject body = new JSONObject();
         try {
             body.put("id", codiceUtente);
@@ -311,5 +311,18 @@ public class ClientMagazzino {
             //TODO: handle exception
         }
     }
+    
+    public static void visualizzaCategorie(){
+        try {
+            JSONObject response = postRequest(indirizzo + "/categoria/getall.php", "");
+            if((Boolean) response.get("success")){
+                System.out.println("--- CATEGORIE ---");
+                System.out.println(response.get("data"));
+            }else{
+                System.out.println(response.get("message"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }    
 }
-

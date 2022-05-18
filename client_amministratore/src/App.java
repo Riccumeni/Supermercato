@@ -31,17 +31,29 @@ public class App {
                 if(codiceUtente>-1){
                     while(!scelta.equals("indietro")){
                         System.out.println("Selezionare una delle seguenti operazioni:");
-                        System.out.println("1. Guarda Incassi\n2. Gestione Fornitori\n3. Inserisci Prodotto\nindietro. Torna indietro");
+                        System.out.println("1. Guarda Incassi\n2. Gestione Fornitori\n3. Inserisci Prodotto\n4. Inserisci Categoria\n5. Visualizza Categorie\n6. Ricerca Prodotto\n7. Guarda Pagamenti\nindietro. Torna indietro");
                         scelta = tastiera.readLine();
                         switch(scelta){
                             case "1":
-                            incassi();
+                            operazioni("/incassi");
                             break;
                             case "2":
                             gestioneFornitori();
                             break;
                             case "3":
                             inserisciProdotto();
+                            break;
+                            case "4":
+                            inserisciCategoria();
+                            break;
+                            case "5":
+                            visualizzaCategorie();
+                            break;
+                            case "6":
+                            ricercaProdottoNome();
+                            break;
+                            case "7":
+                            operazioni("/operazioni");
                             break;
                         }
                     }
@@ -107,7 +119,7 @@ public class App {
         return codiceUtente;
     }
 
-    public static void incassi(){
+    public static void operazioni(String indirizzo_sec){
         JSONObject body = new JSONObject();
         try {
             System.out.println("1. Per giorno\n2. Per mese\n3. Per anno");       
@@ -124,12 +136,12 @@ public class App {
                 s = tastiera.readLine();
                 body.put("anno", s);
 
-                body = postRequest(indirizzo + "/incassi/getgiorno.php", body.toJSONString());
+                body = postRequest(indirizzo + indirizzo_sec +"/getgiorno.php", body.toJSONString());
 
                 if((Boolean) body.get("success")){
-                    System.out.println("--- Ordini ---");
+                    System.out.println("--- OPERAZIONI ---");
                     System.out.println(body.get("ORDINI"));
-                    System.out.println("TOTALE: " + body.get("INCASSI"));
+                    // System.out.println("TOTALE: " + body.get("INCASSI"));
                 }else{
                     System.out.println(body.get("message"));
                 }
@@ -142,7 +154,7 @@ public class App {
                 s = tastiera.readLine();
                 body.put("anno", s);
 
-                body = postRequest(indirizzo + "/incassi/getmese.php", body.toJSONString());
+                body = postRequest(indirizzo + indirizzo_sec + "getmese.php", body.toJSONString());
 
                 if((Boolean) body.get("success")){
                     System.out.println("--- Ordini ---");
@@ -157,7 +169,7 @@ public class App {
                 s = tastiera.readLine();
                 body.put("anno", s);
 
-                body = postRequest(indirizzo + "/incassi/getanno.php", body.toJSONString());
+                body = postRequest(indirizzo + indirizzo_sec + "/getanno.php", body.toJSONString());
 
                 if((Boolean) body.get("success")){
                     System.out.println("--- Ordini ---");
@@ -361,4 +373,52 @@ public class App {
             //TODO: handle exception
         }
     }
+
+    public static void inserisciCategoria(){
+        JSONObject body = new JSONObject();
+        try {
+            System.out.println("Inserisci il nome della nuova categoria:");
+            String s = tastiera.readLine();
+            body.put("nome", s);
+            JSONObject response = postRequest(indirizzo + "/categoria/inserisci.php", body.toJSONString());
+            System.out.println(response.get("message"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void visualizzaCategorie(){
+        try {
+            JSONObject response = postRequest(indirizzo + "/categoria/getall.php", "");
+            if((Boolean) response.get("success")){
+                System.out.println("--- CATEGORIE ---");
+                System.out.println(response.get("data"));
+            }else{
+                System.out.println(response.get("message"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ricercaProdottoNome(){
+        JSONObject body = new JSONObject();
+        try {
+            System.out.println("Inserisci il nome del prodotto da cercare");
+            String nome=tastiera.readLine();
+            body.put("nome", nome);
+            JSONObject response = postRequest(indirizzo + "/ricerca/nome.php", body.toJSONString());
+
+            if((Boolean) response.get("success")){
+                body = new JSONObject();
+                System.out.println(response.get("data"));
+                
+
+            }else{
+                System.out.println(response.get("message"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }    
 }

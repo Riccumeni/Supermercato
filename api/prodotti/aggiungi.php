@@ -5,10 +5,10 @@
 	//includiamo configurazioni e oggetti
 	include_once '../resources/db.php';
 
-	//Connessione db
-	$database = new Database();
-	// $db = $database->getConnection();
-	$db = new mysqli("localhost", "root", "", "Supermercato");
+	include_once '../resources/db.php';
+
+	$database = new Database();    
+	$db = $database->getConnection();
 	$data = json_decode(file_get_contents("php://input"));
 	
 	if((!empty($data->codice) && !empty($data->quantita))){

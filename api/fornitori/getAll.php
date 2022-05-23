@@ -2,12 +2,10 @@
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Methods: POST");
 
-$server = "localhost";
-$username = "root";
-$password = "";
-$db = "Supermercato";
+include_once '../resources/db.php';
 
-$conn = new mysqli($server, $username, $password, $db);
+$database = new Database();    
+$conn = $database->getConnection();
 
 if($conn){
     $sql = "select * from fornitore";

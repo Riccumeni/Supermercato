@@ -2,15 +2,13 @@
     header("Content-Type: application/json; charset=utf-8");
     header("Access-Control-Allow-Methods: POST");
 
-    $server = "localhost";
-    $username = "root";
-    $password = "";
-    $db = "Supermercato";
+    include_once '../resources/db.php';
+
+    $database = new Database();    
+    $conn = $database->getConnection();
 
     $data = json_decode(file_get_contents("php://input"));
     $genere = $data -> genere;
-
-    $conn = new mysqli($server, $username, $password, $db);
 
     if($conn){
         $sql = "select * from prodotto where categoria like '$genere%'";

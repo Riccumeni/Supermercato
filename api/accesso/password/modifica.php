@@ -6,12 +6,10 @@ $data = json_decode(file_get_contents("php://input"));
 $id = $data->id;
 $newpass = $data->nuova_password;
 
-$server = "localhost";
-$username = "root";
-$pass = "";
-$db = "Supermercato";
+include_once '../resources/db.php';
 
-$conn = new mysqli($server, $username, $pass, $db);
+$database = new Database();    
+$conn = $database->getConnection();
 
 if($conn && (!empty($id) && !empty($newpass))){ 
 

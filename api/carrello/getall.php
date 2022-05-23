@@ -6,12 +6,10 @@
 
     $codiceUtente = $data -> codice;
 
-    $server = "localhost";
-    $username = "root";
-    $password = "";
-    $db = "Supermercato";
+    include_once '../resources/db.php';
 
-    $conn = new mysqli($server, $username, $password, $db);
+    $database = new Database();    
+    $conn = $database->getConnection();
 
     if($conn){
         $sql = "select carrello from utente where id='$codiceUtente'";

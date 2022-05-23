@@ -4,7 +4,7 @@
 
 	include_once '../resources/db.php';
 
-	$database = new Database();    //connessione db
+	$database = new Database();    
 	$db = $database->getConnection();
 
 	

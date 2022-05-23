@@ -2,17 +2,15 @@
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Methods: POST");
 
-$server = "localhost";
-$username = "root";
-$password = "";
-$db = "Supermercato";
+include_once '../resources/db.php';
+
+$database = new Database();    
+$conn = $database->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
 $nome_fornitore = $data->nome;
 $email_fornitore = $data->email;
 $indirizzo_fornitore = $data->indirizzo;
-
-$conn = new mysqli($server, $username, $password, $db);
 
 if($conn && !empty($nome_fornitore) && !empty($email_fornitore) && !empty($indirizzo_fornitore)){
     $sql = "insert into fornitore (nome, email, indirizzo) values ('$nome_fornitore', '$email_fornitore', '$indirizzo_fornitore')";

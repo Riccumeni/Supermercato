@@ -5,12 +5,10 @@ header("Access-Control-Allow-Methods: POST");
 $data = json_decode(file_get_contents("php://input"));
 $email = $data->email;
 
-$server = "localhost";
-$username = "root";
-$pass = "";
-$db = "Supermercato";
+include_once '../resources/db.php';
 
-$conn = new mysqli($server, $username, $pass, $db);
+$database = new Database();    
+$conn = $database->getConnection();
 
 if($conn && !empty($email)){
     $comb = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';

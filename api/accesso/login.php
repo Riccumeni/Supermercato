@@ -2,16 +2,14 @@
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Methods: POST");
 
-$server = "localhost";
-$username = "root";
-$pass = "";
-$db = "Supermercato";
+include_once '../resources/db.php';
+
+$database = new Database();    
+$conn = $database->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
 $email = $data->email;
 $password = $data->password;
-
-$conn = new mysqli($server, $username, $pass, $db);
 
 if($conn && (!empty($email) && !empty($password))){
     

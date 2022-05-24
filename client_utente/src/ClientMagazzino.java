@@ -11,7 +11,7 @@ import org.json.simple.parser.ParseException;
 
 public class ClientMagazzino {
     static BufferedReader tastiera = new BufferedReader(new InputStreamReader(System.in));
-    final static String indirizzo = "http://localhost/Supermercato/api";
+    final static String indirizzo = "http://riccumeni.altervista.org/Supermercato/api";
     public static void main(String[] args) throws java.io.IOException, ParseException{
 
         JSONObject body = new JSONObject();
@@ -134,9 +134,8 @@ public class ClientMagazzino {
             e.printStackTrace();
         }
         
-        String i = "http://localhost/Supermercato/api/accesso/login.php";
         try {
-            JSONObject response = postRequest(i, body.toJSONString());
+            JSONObject response = postRequest(indirizzo + "/accesso/login.php", body.toJSONString());
             if((Boolean)response.get("success")){
                 System.out.println(response.get("message"));
                 codiceUtente = Integer.parseInt((String)response.get("id"));

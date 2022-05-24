@@ -19,7 +19,7 @@ import org.json.simple.parser.ParseException;
 */
 public class App {
     static BufferedReader tastiera = new BufferedReader(new InputStreamReader(System.in));
-    static final String indirizzo = "http://localhost/Supermercato/api";
+    static final String indirizzo = "http://riccumeni.altervista.org/Supermercato/api";
     public static void main(String[] args) throws Exception {
         String scelta = "";
         while(!scelta.equals("fine")){
